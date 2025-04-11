@@ -5,7 +5,10 @@ if (typeof window.aiTranslate === 'undefined') {
     translationAborted: false,
     currentTargetLang: '',
     debugMode: false,
-    originalTexts: new Map() // 存储原始文本，用于恢复
+    originalTexts: new Map(), // 存储原始文本，用于恢复
+    translatedTexts: new Map(), // 存储翻译后的文本，用于切换
+    isTranslated: false, // 标记页面是否已被翻译
+    toggleButton: null // 存储切换按钮的引用
   };
 }
 
@@ -39,6 +42,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('[AI翻译] 收到停止翻译请求');
     stopTranslation();
     sendResponse({ status: 'stopped' });
+  } else if (message.action === 'toggleLanguage') {
+    // 切换语言
+    console.log('[AI翻译] 收到切换语言请求');
+    toggleLanguage();
+    sendResponse({ status: 'toggled', isTranslated: aiTranslate.isTranslated });
+  } else if (message.action === 'checkTranslationStatus') {
+    // 检查翻译状态
+    sendResponse({ 
+      isTranslated: aiTranslate.isTranslated,
+      currentTargetLang: aiTranslate.currentTargetLang
+    });
   } else {
     console.log('[AI翻译] 收到未知消息类型:', message.action);
     sendResponse({ status: 'unknown_action' });
@@ -125,6 +139,11 @@ async function startTranslation(targetLang) {
   const startTime = new Date();
   if (aiTranslate.debugMode) {
     console.log(`[AI翻译] 开始翻译，目标语言: ${targetLang}，时间: ${startTime}`);
+  }
+  
+  // 如果页面已经被翻译，先恢复原始文本
+  if (aiTranslate.isTranslated) {
+    restoreOriginalText();
   }
   
   try {
@@ -218,6 +237,12 @@ async function startTranslation(targetLang) {
     if (!aiTranslate.translationAborted) {
       sendProgressMessage('translationComplete');
       
+      // 标记页面已被翻译
+      aiTranslate.isTranslated = true;
+      
+      // 创建或显示切换按钮
+      createOrShowToggleButton();
+      
       if (aiTranslate.debugMode) {
         const endTime = new Date();
         const duration = (endTime - startTime) / 1000;
@@ -269,11 +294,12 @@ function getTranslatableTextNodes() {
       }
     }
     
-    // 处理文本节点
+// 处理文本节点
     if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent.trim();
+      // 使用trim()只是为了检查是否有有意义的文本，但保存原始文本
+      const trimmedText = node.textContent.trim();
       // 只处理非空且包含有意义文本的节点
-      if (text && text.length > 1 && !/^\s*$/.test(text) && !/^\d+$/.test(text)) {
+      if (trimmedText && trimmedText.length > 1 && !/^\s*$/.test(trimmedText) && !/^\d+$/.test(trimmedText)) {
         textNodes.push(node);
       }
       return;
@@ -293,16 +319,19 @@ function getTranslatableTextNodes() {
 function translateTextNode(textNode, targetLang, pageSummary = null) {
   return new Promise((resolve, reject) => {
     try {
-      // 获取节点的文本内容
-      const originalText = textNode.textContent.trim();
+      // 获取节点的完整文本内容，不要trim，保留原始格式
+      const originalText = textNode.textContent;
+      
+      // 使用trim()只是为了检查是否有有意义的文本
+      const trimmedText = originalText.trim();
       
       // 如果文本为空或太短，跳过
-      if (!originalText || originalText.length < 2) {
+      if (!trimmedText || trimmedText.length < 2) {
         resolve();
         return;
       }
       
-      // 存储原始文本
+      // 存储完整的原始文本，包括所有空格和格式
       if (!aiTranslate.originalTexts.has(textNode)) {
         aiTranslate.originalTexts.set(textNode, originalText);
       }
@@ -329,6 +358,9 @@ function translateTextNode(textNode, targetLang, pageSummary = null) {
         
         // 检查翻译是否成功
         if (response && response.success) {
+          // 存储翻译后的文本
+          aiTranslate.translatedTexts.set(textNode, response.translatedText);
+          
           // 替换文本节点内容，保留原始HTML结构
           textNode.textContent = response.translatedText;
           
@@ -383,11 +415,145 @@ function restoreOriginalText() {
     }
   });
   
-  // 清空存储
-  aiTranslate.originalTexts.clear();
+  // 标记页面未被翻译
+  aiTranslate.isTranslated = false;
+  
+  // 更新切换按钮状态
+  updateToggleButtonState();
   
   if (aiTranslate.debugMode) {
     console.log('[AI翻译] 已恢复原始文本');
+  }
+}
+
+
+// 切换语言（在翻译和原始语言之间切换）
+function toggleLanguage() {
+  if (aiTranslate.isTranslated) {
+    // 如果当前是翻译状态，恢复原始文本
+    restoreOriginalText();
+  } else if (aiTranslate.originalTexts.size > 0) {
+    // 如果有保存的翻译，重新应用翻译
+    reapplyTranslation();
+  } else if (aiTranslate.currentTargetLang) {
+    // 如果没有保存的翻译但有目标语言，重新翻译
+    startTranslation(aiTranslate.currentTargetLang);
+  }
+}
+
+// 重新应用之前的翻译（不需要重新调用API）
+function reapplyTranslation() {
+  // 检查是否有保存的翻译文本
+  if (aiTranslate.translatedTexts.size === 0) {
+    // 如果没有保存的翻译文本，但有目标语言，重新翻译
+    if (aiTranslate.currentTargetLang) {
+      startTranslation(aiTranslate.currentTargetLang);
+    }
+    return;
+  }
+  
+  // 遍历所有保存的翻译文本，恢复翻译后的文本
+  aiTranslate.translatedTexts.forEach((translatedText, node) => {
+    // 检查节点是否仍然存在于DOM中
+    if (node && node.parentElement) {
+      // 恢复翻译后的文本
+      node.textContent = translatedText;
+      
+      // 添加已翻译标记到父元素
+      const parentElement = node.parentElement;
+      if (parentElement) {
+        parentElement.dataset.aiTranslated = 'true';
+        parentElement.dataset.originalLang = document.documentElement.lang || 'auto';
+        parentElement.dataset.targetLang = aiTranslate.currentTargetLang;
+      }
+    }
+  });
+  
+  // 标记为已翻译状态
+  aiTranslate.isTranslated = true;
+  
+  // 更新切换按钮状态
+  updateToggleButtonState();
+  
+  if (aiTranslate.debugMode) {
+    console.log('[AI翻译] 已重新应用翻译');
+  }
+}
+
+// 创建或显示切换按钮
+function createOrShowToggleButton() {
+  // 如果按钮已存在，只更新状态
+  if (aiTranslate.toggleButton) {
+    aiTranslate.toggleButton.style.display = 'flex';
+    updateToggleButtonState();
+    return;
+  }
+  
+  // 创建切换按钮
+  const toggleButton = document.createElement('div');
+  toggleButton.id = 'aiTranslateToggleButton';
+  toggleButton.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #4285f4;
+    color: white;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+  `;
+  
+  // 创建图标
+  const icon = document.createElement('span');
+  icon.style.cssText = `
+    margin-right: 8px;
+    font-size: 16px;
+  `;
+  icon.innerHTML = '🌐';
+  
+  // 创建文本
+  const text = document.createElement('span');
+  text.id = 'aiTranslateToggleText';
+  
+  // 添加到按钮
+  toggleButton.appendChild(icon);
+  toggleButton.appendChild(text);
+  
+  // 添加点击事件
+  toggleButton.addEventListener('click', () => {
+    toggleLanguage();
+  });
+  
+  // 添加到页面
+  document.body.appendChild(toggleButton);
+  
+  // 保存按钮引用
+  aiTranslate.toggleButton = toggleButton;
+  
+  // 更新按钮状态
+  updateToggleButtonState();
+}
+
+// 更新切换按钮状态
+function updateToggleButtonState() {
+  if (!aiTranslate.toggleButton) return;
+  
+  const toggleText = document.getElementById('aiTranslateToggleText');
+  if (!toggleText) return;
+  
+  if (aiTranslate.isTranslated) {
+    toggleText.textContent = '查看原文';
+    aiTranslate.toggleButton.title = '点击查看原始语言';
+  } else {
+    toggleText.textContent = '查看翻译';
+    aiTranslate.toggleButton.title = '点击查看翻译';
   }
 }
 

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // 获取DOM元素
   const translateButton = document.getElementById('translatePage');
+  const toggleLanguageButton = document.getElementById('toggleLanguage');
   const stopButton = document.getElementById('stopTranslation');
   const targetLangSelect = document.getElementById('targetLang');
   const statusMessage = document.getElementById('statusMessage');
@@ -10,6 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 初始化
   initializePopup();
+  
+  // 检查当前页面的翻译状态
+  checkTranslationStatus();
 
   // 翻译按钮点击事件
   translateButton.addEventListener('click', async () => {
@@ -81,6 +85,43 @@ document.addEventListener('DOMContentLoaded', () => {
   openOptionsButton.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   });
+  
+  // 切换语言按钮点击事件
+  toggleLanguageButton.addEventListener('click', async () => {
+    try {
+      // 获取当前标签页
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (!tab) {
+        updateStatus('错误: 无法获取当前标签页', 0);
+        return;
+      }
+      
+      // 发送消息到content script切换语言
+      chrome.tabs.sendMessage(tab.id, { action: 'toggleLanguage' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('发送消息错误:', chrome.runtime.lastError);
+          updateStatus('错误: ' + chrome.runtime.lastError.message, 0);
+          return;
+        }
+        
+        if (response && response.status === 'toggled') {
+          // 更新按钮文本
+          updateToggleButtonText(response.isTranslated);
+          
+          // 更新状态
+          if (response.isTranslated) {
+            updateStatus('已切换到翻译版本', 100);
+          } else {
+            updateStatus('已切换到原始版本', 0);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('切换语言过程中出错:', error);
+      updateStatus('错误: ' + error.message, 0);
+    }
+  });
 
   // 监听来自content script的消息
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -95,6 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
       updateStatus(`翻译进度: ${message.progress}%`, message.progress);
     } else if (message.action === 'translationComplete') {
       updateStatus('翻译完成', 100);
+      // 显示切换按钮
+      toggleLanguageButton.style.display = 'block';
+      // 更新切换按钮文本
+      updateToggleButtonText(true);
+      
       setTimeout(() => {
         updateStatus('', 0);
       }, 30000);
@@ -117,6 +163,56 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 检查API配置状态
     checkApiConfiguration();
+  }
+  
+  // 检查当前页面的翻译状态
+  async function checkTranslationStatus() {
+    try {
+      // 获取当前标签页
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (!tab) {
+        return;
+      }
+      
+      // 检查是否可以在此页面上运行脚本
+      if (tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://') || tab.url.startsWith('https://chrome.google.com/webstore')) {
+        return;
+      }
+      
+      // 发送消息到content script检查翻译状态
+      chrome.tabs.sendMessage(tab.id, { action: 'checkTranslationStatus' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('检查翻译状态错误:', chrome.runtime.lastError);
+          return;
+        }
+        
+        if (response && response.isTranslated !== undefined) {
+          // 如果页面已被翻译，显示切换按钮
+          if (response.isTranslated) {
+            toggleLanguageButton.style.display = 'block';
+            updateToggleButtonText(true);
+          } else if (response.currentTargetLang) {
+            // 如果页面未被翻译但有目标语言，也显示切换按钮
+            toggleLanguageButton.style.display = 'block';
+            updateToggleButtonText(false);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('检查翻译状态过程中出错:', error);
+    }
+  }
+  
+  // 更新切换按钮文本
+  function updateToggleButtonText(isTranslated) {
+    if (isTranslated) {
+      toggleLanguageButton.textContent = '查看原文';
+      toggleLanguageButton.title = '点击查看原始语言';
+    } else {
+      toggleLanguageButton.textContent = '查看翻译';
+      toggleLanguageButton.title = '点击查看翻译';
+    }
   }
 
   // 检查API配置
