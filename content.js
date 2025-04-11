@@ -56,6 +56,54 @@ chrome.runtime.sendMessage({ action: 'contentScriptLoaded' }, response => {
   }
 });
 
+// 获取网页内容
+function getPageContent() {
+  // 获取页面的可见文本内容
+  const bodyText = document.body.innerText;
+  
+  // 获取页面标题
+  const title = document.title;
+  
+  // 获取页面的meta描述
+  let metaDescription = '';
+  const metaDescriptionTag = document.querySelector('meta[name="description"]');
+  if (metaDescriptionTag) {
+    metaDescription = metaDescriptionTag.getAttribute('content') || '';
+  }
+  
+  // 获取页面的h1标题
+  let h1Titles = [];
+  document.querySelectorAll('h1').forEach(h1 => {
+    if (h1.innerText.trim()) {
+      h1Titles.push(h1.innerText.trim());
+    }
+  });
+  
+  // 组合页面内容
+  let pageContent = '';
+  
+  if (title) {
+    pageContent += `标题: ${title}\n\n`;
+  }
+  
+  if (metaDescription) {
+    pageContent += `描述: ${metaDescription}\n\n`;
+  }
+  
+  if (h1Titles.length > 0) {
+    pageContent += `主标题: ${h1Titles.join(', ')}\n\n`;
+  }
+  
+  // 添加页面正文内容，但限制长度
+  const maxBodyLength = 5000; // 限制正文长度，避免API请求过大
+  pageContent += `正文内容:\n${bodyText.substring(0, maxBodyLength)}`;
+  if (bodyText.length > maxBodyLength) {
+    pageContent += '...(内容已截断)';
+  }
+  
+  return pageContent;
+}
+
 // 开始翻译
 async function startTranslation(targetLang) {
   // 如果已经在翻译中，先停止
@@ -94,6 +142,47 @@ async function startTranslation(targetLang) {
       return;
     }
     
+    // 如果启用了网页内容总结功能，先获取网页内容总结
+    let pageSummary = null;
+    if (config.enablePageSummary) {
+      try {
+        sendProgressMessage('summarizingPage');
+        const pageContent = getPageContent();
+        
+        if (aiTranslate.debugMode) {
+          console.log(`[AI翻译] 获取到网页内容，长度: ${pageContent.length}`);
+        }
+        
+        // 发送网页内容到后台进行总结
+        const summaryResponse = await new Promise((resolve, reject) => {
+          chrome.runtime.sendMessage({
+            action: 'summarizePageContent',
+            content: pageContent
+          }, (response) => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+              return;
+            }
+            
+            if (response && response.success) {
+              resolve(response.summary);
+            } else {
+              reject(new Error(response?.error || '网页内容总结失败'));
+            }
+          });
+        });
+        
+        pageSummary = summaryResponse;
+        
+        if (aiTranslate.debugMode) {
+          console.log(`[AI翻译] 网页内容总结成功: ${pageSummary}`);
+        }
+      } catch (error) {
+        console.error('[AI翻译] 网页内容总结失败:', error);
+        // 总结失败不影响翻译过程，继续进行翻译
+      }
+    }
+    
     // 批量处理文本节点，每批次处理一定数量的节点
     const batchSize = 5;
     const totalNodes = textNodes.length;
@@ -112,7 +201,7 @@ async function startTranslation(targetLang) {
       const batch = textNodes.slice(i, Math.min(i + batchSize, totalNodes));
       
       // 并行处理当前批次的文本节点
-      await Promise.all(batch.map(node => translateTextNode(node, targetLang)));
+      await Promise.all(batch.map(node => translateTextNode(node, targetLang, pageSummary)));
       
       // 更新进度
       processedNodes += batch.length;
@@ -201,7 +290,7 @@ function getTranslatableTextNodes() {
 }
 
 // 翻译单个文本节点
-function translateTextNode(textNode, targetLang) {
+function translateTextNode(textNode, targetLang, pageSummary = null) {
   return new Promise((resolve, reject) => {
     try {
       // 获取节点的文本内容
@@ -222,7 +311,8 @@ function translateTextNode(textNode, targetLang) {
       chrome.runtime.sendMessage({
         action: 'translateText',
         text: originalText,
-        targetLang: targetLang
+        targetLang: targetLang,
+        pageSummary: pageSummary
       }, (response) => {
         // 检查是否有错误
         if (chrome.runtime.lastError) {

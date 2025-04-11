@@ -84,12 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 监听来自content script的消息
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // 只处理以"translation"开头的消息，避免干扰其他消息处理
-    if (!message.action || !message.action.startsWith('translation')) {
+    // 只处理翻译相关的消息，避免干扰其他消息处理
+    if (!message.action || !(message.action.startsWith('translation') || message.action === 'summarizingPage')) {
       return false; // 不处理非翻译相关的消息
     }
     
-    if (message.action === 'translationProgress') {
+    if (message.action === 'summarizingPage') {
+      updateStatus('正在分析网页内容...', 20);
+    } else if (message.action === 'translationProgress') {
       updateStatus(`翻译进度: ${message.progress}%`, message.progress);
     } else if (message.action === 'translationComplete') {
       updateStatus('翻译完成', 100);

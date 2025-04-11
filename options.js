@@ -1,3 +1,12 @@
+// 默认系统提示词
+const DEFAULT_SYSTEM_PROMPT = `你是一个专业的翻译助手，能够准确地将文本翻译成目标语言，同时保持原文的格式和风格。请注意以下特殊情况：
+
+1. HTML标签名称应根据其功能翻译，例如'strong'应翻译为'加粗'，'em'应翻译为'强调'或'斜体'等。
+
+2. 如果原文不是可被翻译的类型（比如URL、无意义的字母和数字的组合、代码片段、emoji等），那么请直接返回原文。
+
+请只返回最终的结果，不必附带额外的解释信息。`;
+
 document.addEventListener('DOMContentLoaded', () => {
   // 获取DOM元素
   const apiConfigForm = document.getElementById('apiConfigForm');
@@ -8,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const temperatureInput = document.getElementById('temperature');
   const preserveFormattingCheckbox = document.getElementById('preserveFormatting');
   const debugModeCheckbox = document.getElementById('debugMode');
+  const systemPromptTextarea = document.getElementById('systemPrompt');
+  const resetPromptButton = document.getElementById('resetPromptButton');
   const saveButton = document.getElementById('saveButton');
   const testButton = document.getElementById('testButton');
   const resetButton = document.getElementById('resetButton');
@@ -33,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
       resetSettings();
     }
   });
+  
+  // 重置系统提示词为默认值
+  resetPromptButton.addEventListener('click', () => {
+    systemPromptTextarea.value = DEFAULT_SYSTEM_PROMPT;
+    showStatus('已恢复默认系统提示词', 'info');
+  });
 
   // 加载保存的设置
   function loadSavedSettings() {
@@ -43,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'maxTokens',
       'temperature',
       'preserveFormatting',
-      'debugMode'
+      'enablePageSummary',
+      'debugMode',
+      'systemPrompt'
     ], (result) => {
       if (result.apiBaseUrl) apiBaseUrlInput.value = result.apiBaseUrl;
       if (result.apiModel) apiModelInput.value = result.apiModel;
@@ -51,7 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.maxTokens) maxTokensInput.value = result.maxTokens;
       if (result.temperature) temperatureInput.value = result.temperature;
       if (result.preserveFormatting) preserveFormattingCheckbox.checked = result.preserveFormatting;
+      if (result.enablePageSummary !== undefined) document.getElementById('enablePageSummary').checked = result.enablePageSummary;
       if (result.debugMode) debugModeCheckbox.checked = result.debugMode;
+      
+      // 加载系统提示词，如果没有保存过则使用默认值
+      systemPromptTextarea.value = result.systemPrompt || DEFAULT_SYSTEM_PROMPT;
     });
   }
 
@@ -79,7 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
       maxTokens: maxTokensInput.value ? parseInt(maxTokensInput.value) : null,
       temperature: temperatureInput.value ? parseFloat(temperatureInput.value) : null,
       preserveFormatting: preserveFormattingCheckbox.checked,
-      debugMode: debugModeCheckbox.checked
+      enablePageSummary: document.getElementById('enablePageSummary').checked,
+      debugMode: debugModeCheckbox.checked,
+      systemPrompt: systemPromptTextarea.value || DEFAULT_SYSTEM_PROMPT
     }, () => {
       showStatus('设置已保存', 'success');
     });
@@ -144,8 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
       'maxTokens',
       'temperature',
       'preserveFormatting',
+      'enablePageSummary',
       'debugMode',
-      'targetLanguage'
+      'targetLanguage',
+      'systemPrompt'
     ], () => {
       // 清空表单
       apiBaseUrlInput.value = '';
@@ -154,7 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
       maxTokensInput.value = '';
       temperatureInput.value = '';
       preserveFormattingCheckbox.checked = false;
+      document.getElementById('enablePageSummary').checked = false;
       debugModeCheckbox.checked = false;
+      systemPromptTextarea.value = DEFAULT_SYSTEM_PROMPT;
       
       showStatus('所有设置已重置', 'info');
     });

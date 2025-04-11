@@ -47,9 +47,22 @@
       </div>
       
       <div class="form-group checkbox-group">
+        <input type="checkbox" id="enablePageSummary">
+        <label for="enablePageSummary">启用网页内容总结</label>
+        <div class="help-text">在翻译前先总结网页内容，提供上下文以提高翻译质量（可能增加API使用量）</div>
+      </div>
+      
+      <div class="form-group checkbox-group">
         <input type="checkbox" id="debugMode">
         <label for="debugMode">调试模式</label>
         <div class="help-text">启用控制台日志记录以进行故障排除</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="systemPrompt">系统提示词:</label>
+        <textarea id="systemPrompt" rows="6" placeholder="输入自定义系统提示词"></textarea>
+        <div class="help-text">自定义翻译系统提示词，用于指导AI如何翻译内容</div>
+        <button type="button" id="resetPromptButton" class="small-button">恢复默认提示词</button>
       </div>
       
       <div class="button-group">

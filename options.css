@@ -36,7 +36,8 @@ label {
 input[type="url"],
 input[type="text"],
 input[type="password"],
-input[type="number"] {
+input[type="number"],
+textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -45,7 +46,14 @@ input[type="number"] {
   box-sizing: border-box;
 }
 
-input:focus {
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+input:focus,
+textarea:focus {
   border-color: #1a73e8;
   outline: none;
 }
@@ -137,4 +145,16 @@ button {
 .status-message.info {
   background-color: #e8f0fe;
   color: #1a73e8;
+}
+
+.small-button {
+  background-color: #f1f3f4;
+  color: #5f6368;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.small-button:hover {
+  background-color: #e8eaed;
 }
