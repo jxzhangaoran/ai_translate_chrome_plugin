@@ -2,73 +2,82 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>AI 网页翻译 - 设置</title>
+  <title data-i18n="appSettings">AI 网页翻译 - 设置</title>
   <link rel="stylesheet" href="options.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>AI 网页翻译设置</h1>
+    <h1 data-i18n="appSettings">AI 网页翻译设置</h1>
+    
+    <div class="form-group">
+      <label for="interfaceLanguage" data-i18n="interfaceLanguage">界面语言</label>
+      <select id="interfaceLanguage">
+        <option value="zh-CN">简体中文</option>
+        <option value="en">English</option>
+      </select>
+    </div>
     
     <form id="apiConfigForm">
       <div class="form-group">
-        <label for="apiBaseUrl">API Base URL:</label>
-        <input type="url" id="apiBaseUrl" placeholder="例如: https://api.openai.com/v1" required>
-        <div class="help-text">OpenAI API或兼容API的基础URL</div>
+        <label for="apiBaseUrl" data-i18n="apiBaseUrlLabel">API Base URL:</label>
+        <input type="url" id="apiBaseUrl" data-i18n="apiBaseUrlPlaceholder" placeholder="例如: https://api.openai.com/v1" required>
+        <div class="help-text" data-i18n="apiBaseUrlHelp">OpenAI API或兼容API的基础URL</div>
       </div>
       
       <div class="form-group">
-        <label for="apiModel">模型名称:</label>
-        <input type="text" id="apiModel" placeholder="例如: gpt-3.5-turbo" required>
-        <div class="help-text">要使用的LLM模型名称</div>
+        <label for="apiModel" data-i18n="modelNameLabel">模型名称:</label>
+        <input type="text" id="apiModel" data-i18n="modelNamePlaceholder" placeholder="例如: gpt-3.5-turbo" required>
+        <div class="help-text" data-i18n="modelNameHelp">要使用的LLM模型名称</div>
       </div>
       
       <div class="form-group">
-        <label for="apiKey">API Key:</label>
-        <input type="password" id="apiKey" placeholder="输入您的API密钥" required>
-        <div class="help-text">您的API密钥，将安全地存储在浏览器中</div>
+        <label for="apiKey" data-i18n="apiKeyLabel">API Key:</label>
+        <input type="password" id="apiKey" data-i18n="apiKeyPlaceholder" placeholder="输入您的API密钥" required>
+        <div class="help-text" data-i18n="apiKeyHelp">您的API密钥，将安全地存储在浏览器中</div>
       </div>
       
       <div class="form-group">
-        <label for="maxTokens">最大Token数 (可选):</label>
-        <input type="number" id="maxTokens" placeholder="例如: 2000" min="100">
-        <div class="help-text">每个请求的最大token数，留空使用默认值</div>
+        <label for="maxTokens" data-i18n="maxTokensLabel">最大Token数 (可选):</label>
+        <input type="number" id="maxTokens" data-i18n="maxTokensPlaceholder" placeholder="例如: 2000" min="100">
+        <div class="help-text" data-i18n="maxTokensHelp">每个请求的最大token数，留空使用默认值</div>
       </div>
       
       <div class="form-group">
-        <label for="temperature">Temperature (可选):</label>
-        <input type="number" id="temperature" placeholder="0.0 - 1.0" min="0" max="1" step="0.1">
-        <div class="help-text">控制输出的随机性，0为最确定，1为最随机</div>
+        <label for="temperature" data-i18n="temperatureLabel">Temperature (可选):</label>
+        <input type="number" id="temperature" placeholder="0.0 - 1.0" min="0" max="1" step="0.1" data-i18n="temperaturePlaceholder">
+        <div class="help-text" data-i18n="temperatureHelp">控制输出的随机性，0为最确定，1为最随机</div>
       </div>
       
       <div class="form-group checkbox-group">
         <input type="checkbox" id="preserveFormatting">
-        <label for="preserveFormatting">尽量保留原始格式</label>
-        <div class="help-text">尝试在翻译时保留原始文本的格式和布局</div>
+        <label for="preserveFormatting" data-i18n="preserveFormattingLabel">尽量保留原始格式</label>
+        <div class="help-text" data-i18n="preserveFormattingHelp">尝试在翻译时保留原始文本的格式和布局</div>
       </div>
       
       <div class="form-group checkbox-group">
         <input type="checkbox" id="enablePageSummary">
-        <label for="enablePageSummary">启用网页内容总结</label>
-        <div class="help-text">在翻译前先总结网页内容，提供上下文以提高翻译质量（可能增加API使用量）</div>
+        <label for="enablePageSummary" data-i18n="enablePageSummaryLabel">启用网页内容总结</label>
+        <div class="help-text" data-i18n="enablePageSummaryHelp">在翻译前先总结网页内容，提供上下文以提高翻译质量（可能增加API使用量）</div>
       </div>
       
       <div class="form-group checkbox-group">
         <input type="checkbox" id="debugMode">
-        <label for="debugMode">调试模式</label>
-        <div class="help-text">启用控制台日志记录以进行故障排除</div>
+        <label for="debugMode" data-i18n="debugModeLabel">调试模式</label>
+        <div class="help-text" data-i18n="debugModeHelp">启用控制台日志记录以进行故障排除</div>
       </div>
       
       <div class="form-group">
-        <label for="systemPrompt">系统提示词:</label>
-        <textarea id="systemPrompt" rows="6" placeholder="输入自定义系统提示词"></textarea>
-        <div class="help-text">自定义翻译系统提示词，用于指导AI如何翻译内容</div>
-        <button type="button" id="resetPromptButton" class="small-button">恢复默认提示词</button>
+        <label for="systemPrompt" data-i18n="systemPromptLabel">系统提示词:</label>
+        <textarea id="systemPrompt" rows="6" data-i18n="systemPromptPlaceholder" placeholder="输入自定义系统提示词"></textarea>
+        <div class="help-text" data-i18n="systemPromptHelp">自定义翻译系统提示词，用于指导AI如何翻译内容</div>
+        <button type="button" id="resetPromptButton" class="small-button" data-i18n="resetPrompt">恢复默认提示词</button>
       </div>
       
       <div class="button-group">
-        <button type="submit" id="saveButton" class="primary-button">保存设置</button>
-        <button type="button" id="testButton" class="secondary-button">测试连接</button>
-        <button type="button" id="resetButton" class="danger-button">重置设置</button>
+        <button type="submit" id="saveButton" class="primary-button" data-i18n="saveSettings">保存设置</button>
+        <button type="button" id="testButton" class="secondary-button" data-i18n="testConnection">测试连接</button>
+        <button type="button" id="resetButton" class="danger-button" data-i18n="resetSettings">重置设置</button>
       </div>
     </form>
     
@@ -76,5 +85,11 @@
   </div>
   
   <script src="options.js"></script>
+  <script>
+    // 页面加载完成后翻译UI
+    document.addEventListener('DOMContentLoaded', () => {
+      translatePage();
+    });
+  </script>
 </body>
 </html>

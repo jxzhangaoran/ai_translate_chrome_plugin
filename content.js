@@ -541,18 +541,63 @@ function createOrShowToggleButton() {
   updateToggleButtonState();
 }
 
+// 获取翻译文本
+function getI18nMessage(key) {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.runtime.sendMessage({
+        action: 'getI18nMessage',
+        key: key
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('[AI翻译] 获取翻译文本错误:', chrome.runtime.lastError);
+          // 如果出错，使用默认文本
+          const defaultMessages = {
+            'viewOriginal': '查看原文',
+            'viewTranslation': '查看翻译'
+          };
+          resolve(defaultMessages[key] || key);
+          return;
+        }
+        
+        if (response && response.success) {
+          resolve(response.message);
+        } else {
+          console.warn('[AI翻译] 获取翻译文本失败:', response);
+          // 如果失败，使用默认文本
+          const defaultMessages = {
+            'viewOriginal': '查看原文',
+            'viewTranslation': '查看翻译'
+          };
+          resolve(defaultMessages[key] || key);
+        }
+      });
+    } catch (error) {
+      console.error('[AI翻译] 获取翻译文本异常:', error);
+      // 如果异常，使用默认文本
+      const defaultMessages = {
+        'viewOriginal': '查看原文',
+        'viewTranslation': '查看翻译'
+      };
+      resolve(defaultMessages[key] || key);
+    }
+  });
+}
+
 // 更新切换按钮状态
-function updateToggleButtonState() {
+async function updateToggleButtonState() {
   if (!aiTranslate.toggleButton) return;
   
   const toggleText = document.getElementById('aiTranslateToggleText');
   if (!toggleText) return;
   
   if (aiTranslate.isTranslated) {
-    toggleText.textContent = '查看原文';
+    const viewOriginalText = await getI18nMessage('viewOriginal');
+    toggleText.textContent = viewOriginalText;
     aiTranslate.toggleButton.title = '点击查看原始语言';
   } else {
-    toggleText.textContent = '查看翻译';
+    const viewTranslationText = await getI18nMessage('viewTranslation');
+    toggleText.textContent = viewTranslationText;
     aiTranslate.toggleButton.title = '点击查看翻译';
   }
 }

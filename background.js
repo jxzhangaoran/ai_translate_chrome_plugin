@@ -86,11 +86,58 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true; // 保持消息通道开放，以便异步响应
   }
   
+  if (request.action === 'getI18nMessage') {
+    console.log('收到获取翻译文本请求:', request.key);
+    
+    try {
+      // 获取当前界面语言
+      chrome.storage.sync.get(['interfaceLanguage'], (result) => {
+        if (chrome.runtime.lastError) {
+          console.error('获取界面语言错误:', chrome.runtime.lastError);
+          sendResponse({ 
+            success: false, 
+            error: chrome.runtime.lastError.message 
+          });
+          return;
+        }
+        
+        const lang = result.interfaceLanguage || 'zh-CN';
+        
+        // 获取翻译文本
+        const i18n = {
+          'zh-CN': {
+            'viewOriginal': '查看原文',
+            'viewTranslation': '查看翻译'
+          },
+          'en': {
+            'viewOriginal': 'View Original',
+            'viewTranslation': 'View Translation'
+          }
+        };
+        
+        const message = i18n[lang][request.key] || i18n['zh-CN'][request.key] || request.key;
+        
+        sendResponse({ 
+          success: true, 
+          message: message 
+        });
+      });
+    } catch (error) {
+      console.error('获取翻译文本异常:', error);
+      sendResponse({ 
+        success: false, 
+        error: error.message 
+      });
+    }
+    
+    return true; // 保持消息通道开放，以便异步响应
+  }
+  
   if (request.action === 'getApiConfig') {
     console.log('收到获取API配置请求');
     
     try {
-      chrome.storage.sync.get(['apiBaseUrl', 'apiModel', 'apiKey', 'maxTokens', 'temperature', 'preserveFormatting', 'enablePageSummary', 'debugMode', 'systemPrompt'], (result) => {
+      chrome.storage.sync.get(['apiBaseUrl', 'apiModel', 'apiKey', 'maxTokens', 'temperature', 'preserveFormatting', 'enablePageSummary', 'debugMode', 'systemPrompt', 'interfaceLanguage'], (result) => {
         if (chrome.runtime.lastError) {
           console.error('获取API配置错误:', chrome.runtime.lastError);
           sendResponse({ 

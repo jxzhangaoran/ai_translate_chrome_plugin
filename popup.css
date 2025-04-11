@@ -40,7 +40,8 @@ select {
 
 .button-group {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 15px;
 }
 
@@ -48,15 +49,17 @@ button {
   cursor: pointer;
   border: none;
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 8px 10px;
   font-size: 14px;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .primary-button {
   background-color: #1a73e8;
   color: white;
-  flex: 2;
+  flex: 1;
+  min-width: 90px;
 }
 
 .primary-button:hover {

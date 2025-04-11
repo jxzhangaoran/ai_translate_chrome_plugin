@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI 网页翻译",
+  "name": "AI Web Translator",
   "version": "1.0.0",
-  "description": "使用LLM进行网页翻译，替代Chrome浏览器自带的翻译功能",
+  "description": "Web page translation using LLM, an alternative to Chrome's built-in translation feature",
   "permissions": [
     "storage",
     "activeTab",

@@ -1,14 +1,8 @@
-// 默认系统提示词
-const DEFAULT_SYSTEM_PROMPT = `你是一个专业的翻译助手，能够准确地将文本翻译成目标语言，同时保持原文的格式和风格。请注意以下特殊情况：
+// 使用i18n.js中定义的默认系统提示词
 
-1. HTML标签名称应根据其功能翻译，例如'strong'应翻译为'加粗'，'em'应翻译为'强调'或'斜体'等。
-
-2. 如果原文不是可被翻译的类型（比如URL、无意义的字母和数字的组合、代码片段、emoji等），那么请直接返回原文。
-
-请只返回最终的结果，不必附带额外的解释信息。`;
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 获取DOM元素
+  const interfaceLanguageSelect = document.getElementById('interfaceLanguage');
   const apiConfigForm = document.getElementById('apiConfigForm');
   const apiBaseUrlInput = document.getElementById('apiBaseUrl');
   const apiModelInput = document.getElementById('apiModel');
@@ -39,21 +33,50 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 重置设置
-  resetButton.addEventListener('click', () => {
-    if (confirm('确定要重置所有设置吗？这将删除所有已保存的API配置。')) {
+  resetButton.addEventListener('click', async () => {
+    const confirmMessage = await getI18nMessage('confirmReset');
+    if (confirm(confirmMessage)) {
       resetSettings();
     }
   });
   
   // 重置系统提示词为默认值
-  resetPromptButton.addEventListener('click', () => {
-    systemPromptTextarea.value = DEFAULT_SYSTEM_PROMPT;
-    showStatus('已恢复默认系统提示词', 'info');
+  resetPromptButton.addEventListener('click', async () => {
+    systemPromptTextarea.value = await getDefaultSystemPrompt();
+    const message = await getI18nMessage('defaultPromptRestored');
+    showStatus(message, 'info');
+  });
+  
+  // 界面语言变更事件
+  interfaceLanguageSelect.addEventListener('change', async () => {
+    const newLanguage = interfaceLanguageSelect.value;
+    await chrome.storage.sync.set({ interfaceLanguage: newLanguage });
+    
+    // 重新翻译页面
+    await translatePage();
+    
+    // 如果系统提示词是默认值，则更新为新语言的默认提示词
+    chrome.storage.sync.get(['systemPrompt'], async (result) => {
+      // 获取旧的默认提示词（两种语言的）
+      const oldZhPrompt = DEFAULT_SYSTEM_PROMPTS['zh-CN'];
+      const oldEnPrompt = DEFAULT_SYSTEM_PROMPTS['en'];
+      
+      // 如果当前提示词是默认提示词之一，则更新为新语言的默认提示词
+      if (!result.systemPrompt || result.systemPrompt === oldZhPrompt || result.systemPrompt === oldEnPrompt) {
+        const newDefaultPrompt = await getDefaultSystemPrompt();
+        systemPromptTextarea.value = newDefaultPrompt;
+      }
+    });
+    
+    // 显示语言已更改的消息
+    const message = newLanguage === 'zh-CN' ? '界面语言已更改为中文' : 'Interface language changed to English';
+    showStatus(message, 'info');
   });
 
   // 加载保存的设置
   function loadSavedSettings() {
     chrome.storage.sync.get([
+      'interfaceLanguage',
       'apiBaseUrl',
       'apiModel',
       'apiKey',
@@ -64,6 +87,11 @@ document.addEventListener('DOMContentLoaded', () => {
       'debugMode',
       'systemPrompt'
     ], (result) => {
+      // 设置界面语言
+      if (result.interfaceLanguage) {
+        interfaceLanguageSelect.value = result.interfaceLanguage;
+      }
+      
       if (result.apiBaseUrl) apiBaseUrlInput.value = result.apiBaseUrl;
       if (result.apiModel) apiModelInput.value = result.apiModel;
       if (result.apiKey) apiKeyInput.value = result.apiKey;
@@ -74,15 +102,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.debugMode) debugModeCheckbox.checked = result.debugMode;
       
       // 加载系统提示词，如果没有保存过则使用默认值
-      systemPromptTextarea.value = result.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+      if (result.systemPrompt) {
+        systemPromptTextarea.value = result.systemPrompt;
+      } else {
+        getDefaultSystemPrompt().then(defaultPrompt => {
+          systemPromptTextarea.value = defaultPrompt;
+        });
+      }
     });
   }
 
   // 保存设置
-  function saveSettings() {
+  async function saveSettings() {
     // 验证必填字段
     if (!apiBaseUrlInput.value || !apiModelInput.value || !apiKeyInput.value) {
-      showStatus('请填写所有必填字段', 'error');
+      const message = await getI18nMessage('fillRequiredFields');
+      showStatus(message, 'error');
       return;
     }
 
@@ -90,7 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       new URL(apiBaseUrlInput.value);
     } catch (e) {
-      showStatus('请输入有效的API Base URL', 'error');
+      const message = await getI18nMessage('enterValidUrl');
+      showStatus(message, 'error');
       return;
     }
 
@@ -104,9 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
       preserveFormatting: preserveFormattingCheckbox.checked,
       enablePageSummary: document.getElementById('enablePageSummary').checked,
       debugMode: debugModeCheckbox.checked,
-      systemPrompt: systemPromptTextarea.value || DEFAULT_SYSTEM_PROMPT
-    }, () => {
-      showStatus('设置已保存', 'success');
+      systemPrompt: systemPromptTextarea.value || await getDefaultSystemPrompt()
+    }, async () => {
+      const message = await getI18nMessage('settingsSaved');
+      showStatus(message, 'success');
     });
   }
 
@@ -114,11 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function testApiConnection() {
     // 验证必填字段
     if (!apiBaseUrlInput.value || !apiModelInput.value || !apiKeyInput.value) {
-      showStatus('请先填写API配置', 'error');
+      const message = await getI18nMessage('fillApiConfig');
+      showStatus(message, 'error');
       return;
     }
 
-    showStatus('正在测试API连接...', 'info');
+    const testingMessage = await getI18nMessage('testingConnection');
+    showStatus(testingMessage, 'info');
 
     try {
       // 构建API请求
@@ -150,18 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       
       if (data.choices && data.choices.length > 0) {
-        showStatus('API连接成功！', 'success');
+        const successMessage = await getI18nMessage('connectionSuccess');
+        showStatus(successMessage, 'success');
       } else {
-        showStatus('API响应格式不正确', 'error');
+        const invalidMessage = await getI18nMessage('invalidResponse');
+        showStatus(invalidMessage, 'error');
       }
     } catch (error) {
-      showStatus(`连接失败: ${error.message}`, 'error');
+      const failedMessage = await getI18nMessage('connectionFailed', error.message);
+      showStatus(failedMessage, 'error');
       console.error('API测试错误:', error);
     }
   }
 
   // 重置设置
-  function resetSettings() {
+  async function resetSettings() {
     chrome.storage.sync.remove([
       'apiBaseUrl',
       'apiModel',
@@ -173,7 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'debugMode',
       'targetLanguage',
       'systemPrompt'
-    ], () => {
+      // 注意：不要删除interfaceLanguage设置
+    ], async () => {
       // 清空表单
       apiBaseUrlInput.value = '';
       apiModelInput.value = '';
@@ -183,9 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
       preserveFormattingCheckbox.checked = false;
       document.getElementById('enablePageSummary').checked = false;
       debugModeCheckbox.checked = false;
-      systemPromptTextarea.value = DEFAULT_SYSTEM_PROMPT;
+      systemPromptTextarea.value = await getDefaultSystemPrompt();
       
-      showStatus('所有设置已重置', 'info');
+      const resetMessage = await getI18nMessage('settingsReset');
+      showStatus(resetMessage, 'info');
     });
   }
 
