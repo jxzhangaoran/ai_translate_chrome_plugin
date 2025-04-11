@@ -1,69 +1,79 @@
-# AI 网页翻译 Chrome 插件
+# AI Web Translator Chrome Extension
 
-这是一个使用LLM进行网页翻译的Chrome插件，可以替代Chrome浏览器自带的翻译功能，提供更准确的翻译结果。
+English | [简体中文](README_CN.md)
 
-## 功能特点
+## Project Introduction
 
-- 使用LLM进行翻译，替代传统机器翻译
-- 支持OpenAI API Compatible模式，可自定义API提供商
-- 自动识别网页内容并翻译为目标语言
-- 直接替换DOM节点，保持原始网页布局
-- 支持多种语言之间的互译
-- 可自定义翻译参数（温度、最大token数等）
+AI Web Translator is a Chrome browser extension based on Large Language Models (LLM), designed to provide more accurate and natural webpage translation compared to traditional machine translation. It can replace Chrome's built-in translation feature, understanding the overall context of webpages through AI technology to deliver more precise translation results.
 
-## 安装说明
+## Core Features
 
-1. 下载或克隆本仓库到本地
-2. 打开Chrome浏览器，进入扩展程序页面（chrome://extensions/）
-3. 开启"开发者模式"
-4. 点击"加载已解压的扩展程序"，选择本仓库文件夹
-5. 插件将被安装到Chrome浏览器中
+### 🤖 High-Quality LLM-Based Translation
 
-## 使用方法
+- Utilizes Large Language Models for translation, providing more natural and accurate results compared to traditional machine translation
+- Supports webpage content summarization to improve translation quality by understanding the entire context
+- Preserves the original webpage format and layout, offering a seamless reading experience
 
-1. 点击Chrome工具栏中的插件图标打开弹出窗口
-2. 在设置页面配置API信息（点击"设置"按钮）：
-   - API Base URL（例如：https://api.openai.com/v1）
-   - 模型名称（例如：gpt-3.5-turbo）
+### ⚙️ Highly Customizable
+
+- **Custom API Configuration**: Supports OpenAI API and compatible interfaces, with customizable API Base URL
+- **Custom Model Selection**: Choose different LLM models (such as deepseek-reasoner, gpt-4o, claude-3-7-sonnet, etc.)
+- **Custom Translation Parameters**: Adjust temperature, maximum token count, and other parameters
+- **Custom System Prompts**: Customize translation system prompts to precisely control translation style and quality
+
+### 🌐 Multi-Language Support
+
+- Supports translation between multiple languages (Simplified Chinese, English, Japanese, Korean, French, German, Spanish, Russian, etc.)
+- Extension interface available in both Chinese and English
+
+### 🔄 Convenient User Experience
+
+- One-click translation of the current webpage
+- Quick toggle between original text and translation
+- Ability to stop translation at any time
+- Real-time translation progress display
+
+## Feature Showcase
+
+### Extension Popup Window
+
+![Extension Popup Window](./screenshots/en/popup.png)
+
+### Settings Page
+
+![Settings Page](./screenshots/en/options.png)
+
+### Translation Showcase
+> ### [DLSite Comic](https://www.dlsite.com/comic/work/=/product_id/BJ01934689.html)
+> ![原始网页](./screenshots/en/original1.png)
+> ![翻译结果](./screenshots/en/translate1.png)
+
+> ### [Wikipedia](https://zh.wikipedia.org/wiki/%E8%89%BE%E6%BA%AA%E6%B9%96)
+> ![原始网页](./screenshots/en/original2.png)
+> ![翻译结果](./screenshots/en/translate2.png)
+## Installation Instructions
+
+1. Download or clone this repository to your local machine
+2. Open Chrome browser and navigate to the extensions page (chrome://extensions/)
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the repository folder
+5. The extension will be installed in your Chrome browser
+
+## Usage Guide
+
+1. Click the extension icon in the Chrome toolbar to open the popup window
+2. Configure API information in the settings page (click the "Settings" button):
+   - API Base URL (e.g., https://api.openai.com/v1)
+   - Model name (e.g., gpt-4o)
    - API Key
-   - 可选参数（最大Token数、Temperature等）
-3. 选择目标语言
-4. 点击"翻译当前页面"按钮开始翻译
-5. 翻译过程中可以点击"停止翻译"按钮随时中止
+   - Optional parameters (Max Tokens, Temperature, etc.)
+3. Select the target language
+4. Click the "Translate Page" button to start translation
+5. During translation, you can click the "Stop Translation" button to stop at any time
+6. After translation is complete, use the toggle button in the bottom right corner of the page to switch between original text and translation
 
-## 图标说明
+## Privacy Statement
 
-插件需要以下尺寸的图标：
-- 16x16 像素
-- 48x48 像素
-- 128x128 像素
-
-您可以使用任何图像编辑工具创建这些图标，并将它们保存在 `icons` 目录中，命名为：
-- icon16.png
-- icon48.png
-- icon128.png
-
-## 开发说明
-
-### 文件结构
-
-- `manifest.json`: 插件配置文件
-- `popup.html/js/css`: 弹出窗口界面
-- `options.html/js/css`: 选项页面
-- `background.js`: 后台脚本，处理API调用
-- `content.js`: 内容脚本，操作网页DOM
-- `icons/`: 图标文件夹
-
-### 调试模式
-
-在选项页面中启用"调试模式"可以在控制台中查看详细的日志信息，有助于排查问题。
-
-## 隐私说明
-
-- 插件仅在用户主动点击"翻译当前页面"按钮时才会处理网页内容
-- API密钥和其他设置仅存储在本地浏览器中，不会发送到任何第三方服务器
-- 翻译过程中，网页内容会发送到用户配置的API服务器进行处理
-
-## 许可证
-
-MIT
+- The extension only processes webpage content when the user actively clicks the "Translate Page" button
+- API keys and other settings are stored locally in the browser and are not sent to any third-party servers
+- During translation, webpage content is sent to the user-configured API server for processing
