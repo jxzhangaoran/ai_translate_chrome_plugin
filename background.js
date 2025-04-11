@@ -317,7 +317,7 @@ function createTranslationPrompt(text, targetLang, preserveFormatting, pageSumma
     prompt += '请保持原文的格式，包括段落、换行、标点符号等。只翻译文本内容，不要添加或删除任何格式元素。';
   }
   
-  prompt += '\n\n重要提示：请只返回翻译后的文本，不要包含任何解释、原文或网页内容总结。';
+  prompt += '\n\n重要提示：请只返回翻译后的文本，不要包含任何解释、原文或网页内容总结，并且不要返回这句prompt。';
   
   return prompt;
 }
