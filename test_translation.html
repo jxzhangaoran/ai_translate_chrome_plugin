@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Translation Test Page</h1>
+        <p>This page contains various HTML elements to test translation functionality.</p>
+    </header>
+
+    <section>
+        <h2>Basic Text Elements</h2>
+        <p>This is a simple paragraph with <em>emphasized</em> and <strong>strong</strong> text.</p>
+        <p>Here's a sentence with a <span class="highlight">highlighted phrase</span> that might be important.</p>
+        <blockquote>
+            This is a blockquote. It might contain quoted text from another source.
+        </blockquote>
+    </section>
+
+    <section>
+        <h2>Lists</h2>
+        <h3>Unordered List</h3>
+        <ul>
+            <li>First item in an unordered list</li>
+            <li>Second item with <a href="#">a link</a></li>
+            <li>Third item with <code>some code</code></li>
+        </ul>
+
+        <h3>Ordered List</h3>
+        <ol>
+            <li>First step in a process</li>
+            <li>Second step with <em>emphasis</em></li>
+            <li>Third step with a nested list:
+                <ul>
+                    <li>Nested item one</li>
+                    <li>Nested item two</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>John Smith</td>
+                    <td>Software Engineer</td>
+                    <td>New York</td>
+                </tr>
+                <tr>
+                    <td>Emily Johnson</td>
+                    <td>Product Manager</td>
+                    <td>San Francisco</td>
+                </tr>
+                <tr>
+                    <td>Michael Brown</td>
+                    <td>UX Designer</td>
+                    <td>London</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>Form Elements</h2>
+        <form>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Enter your name">
+            </div>
+            <div>
+                <label for="message">Message:</label>
+                <textarea id="message" placeholder="Enter your message"></textarea>
+            </div>
+            <div>
+                <label>Preferences:</label>
+                <label><input type="checkbox"> Email notifications</label>
+                <label><input type="checkbox"> SMS alerts</label>
+            </div>
+            <div>
+                <button type="button">Submit Form</button>
+            </div>
+        </form>
+    </section>
+
+    <section>
+        <h2>Special Cases</h2>
+        <div>
+            <p>Text with HTML entities: &copy; 2023, &amp; Company Inc.</p>
+            <p>Text with numbers and symbols: 50% off! Price: $99.99</p>
+            <p>Text with abbreviations: <abbr title="World Health Organization">WHO</abbr> and <abbr title="United Nations">UN</abbr></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Footer text with a <a href="mailto:example@example.com">contact email</a>.</p>
+        <p><small>Copyright &copy; 2023 Translation Test Page</small></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AI 网页翻译 - 设置</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>AI 网页翻译设置</h1>
+    
+    <form id="apiConfigForm">
+      <div class="form-group">
+        <label for="apiBaseUrl">API Base URL:</label>
+        <input type="url" id="apiBaseUrl" placeholder="例如: https://api.openai.com/v1" required>
+        <div class="help-text">OpenAI API或兼容API的基础URL</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="apiModel">模型名称:</label>
+        <input type="text" id="apiModel" placeholder="例如: gpt-3.5-turbo" required>
+        <div class="help-text">要使用的LLM模型名称</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="apiKey">API Key:</label>
+        <input type="password" id="apiKey" placeholder="输入您的API密钥" required>
+        <div class="help-text">您的API密钥，将安全地存储在浏览器中</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="maxTokens">最大Token数 (可选):</label>
+        <input type="number" id="maxTokens" placeholder="例如: 2000" min="100">
+        <div class="help-text">每个请求的最大token数，留空使用默认值</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="temperature">Temperature (可选):</label>
+        <input type="number" id="temperature" placeholder="0.0 - 1.0" min="0" max="1" step="0.1">
+        <div class="help-text">控制输出的随机性，0为最确定，1为最随机</div>
+      </div>
+      
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="preserveFormatting">
+        <label for="preserveFormatting">尽量保留原始格式</label>
+        <div class="help-text">尝试在翻译时保留原始文本的格式和布局</div>
+      </div>
+      
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="debugMode">
+        <label for="debugMode">调试模式</label>
+        <div class="help-text">启用控制台日志记录以进行故障排除</div>
+      </div>
+      
+      <div class="button-group">
+        <button type="submit" id="saveButton" class="primary-button">保存设置</button>
+        <button type="button" id="testButton" class="secondary-button">测试连接</button>
+        <button type="button" id="resetButton" class="danger-button">重置设置</button>
+      </div>
+    </form>
+    
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #1a73e8;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+input[type="url"],
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  border-color: #1a73e8;
+  outline: none;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #5f6368;
+  margin-top: 5px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+.checkbox-group .help-text {
+  margin-left: 24px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.primary-button {
+  background-color: #1a73e8;
+  color: white;
+  flex: 2;
+}
+
+.primary-button:hover {
+  background-color: #1557b0;
+}
+
+.secondary-button {
+  background-color: #f1f3f4;
+  color: #5f6368;
+  flex: 1;
+}
+
+.secondary-button:hover {
+  background-color: #e8eaed;
+}
+
+.danger-button {
+  background-color: #f1f3f4;
+  color: #d93025;
+  flex: 1;
+}
+
+.danger-button:hover {
+  background-color: #fce8e6;
+}
+
+.status-message {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.status-message.success {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.status-message.error {
+  background-color: #fce8e6;
+  color: #d93025;
+}
+
+.status-message.info {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
