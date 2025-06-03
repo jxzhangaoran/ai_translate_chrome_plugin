@@ -137,7 +137,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('收到获取API配置请求');
     
     try {
-      chrome.storage.sync.get(['apiBaseUrl', 'apiModel', 'apiKey', 'maxTokens', 'temperature', 'preserveFormatting', 'enablePageSummary', 'debugMode', 'systemPrompt', 'interfaceLanguage'], (result) => {
+      chrome.storage.sync.get(['apiBaseUrl', 'apiModel', 'apiKey', 'temperature', 'preserveFormatting', 'enablePageSummary', 'debugMode', 'systemPrompt', 'interfaceLanguage'], (result) => {
         if (chrome.runtime.lastError) {
           console.error('获取API配置错误:', chrome.runtime.lastError);
           sendResponse({ 
@@ -208,11 +208,6 @@ async function summarizePageContent(content) {
     temperature: 0.3,
   };
   
-  // 如果设置了最大token数，添加到请求中
-  if (config.maxTokens) {
-    requestBody.max_tokens = config.maxTokens;
-  }
-  
   // 调试模式下记录请求
   if (config.debugMode) {
     console.log('Summary request:', {
@@ -243,8 +238,8 @@ async function summarizePageContent(content) {
     
     // 检查响应状态
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`API错误: ${errorData.error?.message || response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API错误 (${response.status}): ${errorData.error?.message || response.statusText}`);
     }
     
     // 解析响应
@@ -299,11 +294,6 @@ async function translateText(text, targetLang, pageSummary) {
     temperature: config.temperature || 0.3,
   };
   
-  // 如果设置了最大token数，添加到请求中
-  if (config.maxTokens) {
-    requestBody.max_tokens = config.maxTokens;
-  }
-  
   // 调试模式下记录请求
   if (config.debugMode) {
     console.log('Translation request:', {
@@ -325,8 +315,8 @@ async function translateText(text, targetLang, pageSummary) {
     
     // 检查响应状态
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`API错误: ${errorData.error?.message || response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`API错误 (${response.status}): ${errorData.error?.message || response.statusText}`);
     }
     
     // 解析响应
@@ -393,7 +383,6 @@ function getApiConfig() {
         'apiBaseUrl',
         'apiModel',
         'apiKey',
-        'maxTokens',
         'temperature',
         'preserveFormatting',
         'enablePageSummary',

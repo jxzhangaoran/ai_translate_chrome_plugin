@@ -38,9 +38,9 @@ const i18n = {
     'apiKeyLabel': 'API Key:',
     'apiKeyPlaceholder': '输入您的API密钥',
     'apiKeyHelp': '您的API密钥，将安全地存储在浏览器中',
-    'maxTokensLabel': '最大Token数 (可选):',
-    'maxTokensPlaceholder': '例如: 2000',
-    'maxTokensHelp': '每个请求的最大token数，留空使用默认值',
+
+
+
     'temperatureLabel': 'Temperature (可选):',
     'temperaturePlaceholder': '0.0 - 1.0',
     'temperatureHelp': '控制输出的随机性，0为最确定，1为最随机',
@@ -108,9 +108,9 @@ const i18n = {
     'apiKeyLabel': 'API Key:',
     'apiKeyPlaceholder': 'Enter your API key',
     'apiKeyHelp': 'Your API key, will be stored securely in your browser',
-    'maxTokensLabel': 'Max Tokens (Optional):',
-    'maxTokensPlaceholder': 'e.g., 2000',
-    'maxTokensHelp': 'Maximum tokens per request, leave empty for default',
+
+
+
     'temperatureLabel': 'Temperature (Optional):',
     'temperaturePlaceholder': '0.0 - 1.0',
     'temperatureHelp': 'Controls randomness of output, 0 for deterministic, 1 for random',

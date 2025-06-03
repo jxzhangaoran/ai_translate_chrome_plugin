@@ -219,17 +219,25 @@ async function startTranslation(targetLang) {
       // 获取当前批次的文本节点
       const batch = textNodes.slice(i, Math.min(i + batchSize, totalNodes));
       
-      // 并行处理当前批次的文本节点
-      await Promise.all(batch.map(node => translateTextNode(node, targetLang, pageSummary)));
-      
-      // 更新进度
-      processedNodes += batch.length;
-      const progress = Math.round((processedNodes / totalNodes) * 100);
-      sendProgressMessage('translationProgress', progress);
-      
-      // 如果不是最后一批，等待一小段时间再处理下一批，避免API限制
-      if (i + batchSize < totalNodes && !aiTranslate.translationAborted) {
-        await new Promise(resolve => setTimeout(resolve, 300));
+      try {
+        // 并行处理当前批次的文本节点
+        await Promise.all(batch.map(node => translateTextNode(node, targetLang, pageSummary)));
+        
+        // 更新进度
+        processedNodes += batch.length;
+        const progress = Math.round((processedNodes / totalNodes) * 100);
+        sendProgressMessage('translationProgress', progress);
+        
+        // 如果不是最后一批，等待一小段时间再处理下一批，避免API限制
+        if (i + batchSize < totalNodes && !aiTranslate.translationAborted) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      } catch (error) {
+        // 如果批次中有翻译失败，停止整个翻译过程
+        console.error('[AI翻译] 批次翻译失败:', error);
+        sendProgressMessage('translationError', null, error.message);
+        aiTranslate.isTranslating = false;
+        return;
       }
     }
     
@@ -251,7 +259,7 @@ async function startTranslation(targetLang) {
     }
   } catch (error) {
     console.error('[AI翻译] 翻译过程中出错:', error);
-    sendProgressMessage('translationError', error.message);
+    sendProgressMessage('translationError', null, error.message);
   } finally {
     aiTranslate.isTranslating = false;
   }
@@ -294,7 +302,7 @@ function getTranslatableTextNodes() {
       }
     }
     
-// 处理文本节点
+    // 处理文本节点
     if (node.nodeType === Node.TEXT_NODE) {
       // 使用trim()只是为了检查是否有有意义的文本，但保存原始文本
       const trimmedText = node.textContent.trim();
@@ -345,8 +353,9 @@ function translateTextNode(textNode, targetLang, pageSummary = null) {
       }, (response) => {
         // 检查是否有错误
         if (chrome.runtime.lastError) {
-          console.error('[AI翻译] 发送消息错误:', chrome.runtime.lastError);
-          reject(chrome.runtime.lastError);
+          const errorMsg = `发送消息错误: ${chrome.runtime.lastError.message}`;
+          console.error('[AI翻译]', errorMsg);
+          reject(new Error(errorMsg));
           return;
         }
         
@@ -376,7 +385,11 @@ function translateTextNode(textNode, targetLang, pageSummary = null) {
             console.log(`[AI翻译] 翻译成功: ${originalText.substring(0, 30)}... => ${response.translatedText.substring(0, 30)}...`);
           }
         } else {
-          console.error('[AI翻译] 翻译失败:', response?.error || '未知错误:', response);
+          const errorMsg = response?.error || '翻译接口返回未知错误';
+          console.error('[AI翻译] 翻译失败:', errorMsg, response);
+          // 发送错误消息到popup，停止翻译进度条并显示错误
+          reject(new Error(errorMsg));
+          return;
         }
         
         resolve();
@@ -425,7 +438,6 @@ function restoreOriginalText() {
     console.log('[AI翻译] 已恢复原始文本');
   }
 }
-
 
 // 切换语言（在翻译和原始语言之间切换）
 function toggleLanguage() {

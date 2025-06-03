@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const apiBaseUrlInput = document.getElementById('apiBaseUrl');
   const apiModelInput = document.getElementById('apiModel');
   const apiKeyInput = document.getElementById('apiKey');
-  const maxTokensInput = document.getElementById('maxTokens');
+
   const temperatureInput = document.getElementById('temperature');
   const preserveFormattingCheckbox = document.getElementById('preserveFormatting');
   const debugModeCheckbox = document.getElementById('debugMode');
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'apiBaseUrl',
       'apiModel',
       'apiKey',
-      'maxTokens',
+
       'temperature',
       'preserveFormatting',
       'enablePageSummary',
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (result.apiBaseUrl) apiBaseUrlInput.value = result.apiBaseUrl;
       if (result.apiModel) apiModelInput.value = result.apiModel;
       if (result.apiKey) apiKeyInput.value = result.apiKey;
-      if (result.maxTokens) maxTokensInput.value = result.maxTokens;
+
       if (result.temperature) temperatureInput.value = result.temperature;
       if (result.preserveFormatting) preserveFormattingCheckbox.checked = result.preserveFormatting;
       if (result.enablePageSummary !== undefined) document.getElementById('enablePageSummary').checked = result.enablePageSummary;
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       apiBaseUrl: apiBaseUrlInput.value,
       apiModel: apiModelInput.value,
       apiKey: apiKeyInput.value,
-      maxTokens: maxTokensInput.value ? parseInt(maxTokensInput.value) : null,
+
       temperature: temperatureInput.value ? parseFloat(temperatureInput.value) : null,
       preserveFormatting: preserveFormattingCheckbox.checked,
       enablePageSummary: document.getElementById('enablePageSummary').checked,
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'apiBaseUrl',
       'apiModel',
       'apiKey',
-      'maxTokens',
+
       'temperature',
       'preserveFormatting',
       'enablePageSummary',
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       apiBaseUrlInput.value = '';
       apiModelInput.value = '';
       apiKeyInput.value = '';
-      maxTokensInput.value = '';
+
       temperatureInput.value = '';
       preserveFormattingCheckbox.checked = false;
       document.getElementById('enablePageSummary').checked = false;
